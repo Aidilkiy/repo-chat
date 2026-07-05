@@ -1,28 +1,44 @@
-import OpenAI from "openai";
+const EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || "gemini-embedding-001";
 
-const EMBEDDING_MODEL = "text-embedding-3-small";
-const BATCH_SIZE = 100;
-
-let client: OpenAI | null = null;
-
-function getClient(): OpenAI {
-  if (!client) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not set. Add it to server/.env");
-    }
-    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getApiKey(): string {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not set. Add it to server/.env");
   }
-  return client;
+  return apiKey;
 }
 
-export async function embedTexts(texts: string[]): Promise<number[][]> {
-  const openai = getClient();
-  const results: number[][] = [];
+async function embedOne(apiKey: string, text: string): Promise<number[]> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: { parts: [{ text }] } }),
+    }
+  );
 
-  for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-    const batch = texts.slice(i, i + BATCH_SIZE);
-    const response = await openai.embeddings.create({ model: EMBEDDING_MODEL, input: batch });
-    results.push(...response.data.map((item) => item.embedding));
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Gemini embedding request failed (${response.status}): ${errorBody}`);
+  }
+
+  const body = (await response.json()) as { embedding: { values: number[] } };
+  return body.embedding.values;
+}
+
+const CONCURRENCY = 5;
+
+export async function embedTexts(texts: string[]): Promise<number[][]> {
+  const apiKey = getApiKey();
+  const results: number[][] = new Array(texts.length);
+
+  for (let i = 0; i < texts.length; i += CONCURRENCY) {
+    const batch = texts.slice(i, i + CONCURRENCY);
+    const embeddings = await Promise.all(batch.map((text) => embedOne(apiKey, text)));
+    embeddings.forEach((embedding, offset) => {
+      results[i + offset] = embedding;
+    });
   }
 
   return results;

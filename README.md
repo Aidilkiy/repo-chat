@@ -9,8 +9,8 @@ Onboarding onto an unfamiliar codebase means grepping around for "where is X han
 ## How it works
 
 1. **Ingest** (`POST /api/ingest`) — fetches a public repo's file tree via the GitHub REST API, filters to source/doc files, and splits each file into overlapping ~60-line chunks.
-2. **Embed** — each chunk is embedded with OpenAI's `text-embedding-3-small` and stored in SQLite (embedding vector saved as JSON).
-3. **Query** (`POST /api/query`) — the question is embedded, compared against stored chunks via cosine similarity (computed in-process — no vector DB needed at this scale), and the top matches are passed to `gpt-4o-mini` with instructions to answer only from those excerpts and cite them.
+2. **Embed** — each chunk is embedded with Gemini's `gemini-embedding-001` and stored in SQLite (embedding vector saved as JSON).
+3. **Query** (`POST /api/query`) — the question is embedded, compared against stored chunks via cosine similarity (computed in-process — no vector DB needed at this scale), and the top matches are passed to `gemini-2.5-flash` with instructions to answer only from those excerpts and cite them.
 
 ```
 web/    React + Vite frontend — repo input, chat UI, expandable source citations
@@ -22,7 +22,7 @@ server/ Express + TypeScript API — ingestion, embeddings, retrieval, answer ge
 ```bash
 # 1. Backend
 cd server
-cp ../.env.example .env   # then fill in OPENAI_API_KEY
+cp ../.env.example .env   # then fill in GEMINI_API_KEY
 npm install
 npm run dev               # http://localhost:8787
 
@@ -35,7 +35,7 @@ npm run dev                # http://localhost:5173, proxies /api to :8787
 ## Running with Docker
 
 ```bash
-cp .env.example .env   # fill in OPENAI_API_KEY
+cp .env.example .env   # fill in GEMINI_API_KEY
 docker compose up --build
 ```
 
