@@ -66,17 +66,27 @@ export async function fetchRepoFiles(repoUrl: string): Promise<RepoFile[]> {
     .map((entry: { path: string }) => entry.path)
     .slice(0, MAX_FILES);
 
+  const FETCH_CONCURRENCY = 10;
   const files: RepoFile[] = [];
 
-  for (const path of candidatePaths) {
-    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/${path}`;
-    const response = await fetch(rawUrl);
-    if (!response.ok) continue;
+  for (let i = 0; i < candidatePaths.length; i += FETCH_CONCURRENCY) {
+    const batch = candidatePaths.slice(i, i + FETCH_CONCURRENCY);
+    const results = await Promise.all(
+      batch.map(async (path) => {
+        const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/${path}`;
+        const response = await fetch(rawUrl);
+        if (!response.ok) return null;
 
-    const content = await response.text();
-    if (content.trim().length === 0) continue;
+        const content = await response.text();
+        if (content.trim().length === 0) return null;
 
-    files.push({ path, content });
+        return { path, content };
+      })
+    );
+
+    for (const file of results) {
+      if (file) files.push(file);
+    }
   }
 
   return files;

@@ -7,6 +7,8 @@ import type { IngestRequest, IngestResponse } from "../types.js";
 
 export const ingestRouter = Router();
 
+const MAX_CHUNKS = 150;
+
 ingestRouter.post("/ingest", async (req, res) => {
   const { repoUrl } = req.body as IngestRequest;
 
@@ -23,6 +25,15 @@ ingestRouter.post("/ingest", async (req, res) => {
     }
 
     const chunks = chunkFiles(files);
+
+    if (chunks.length > MAX_CHUNKS) {
+      return res.status(422).json({
+        error:
+          `This repo produced ${chunks.length} chunks, which is too large for the free Gemini tier's rate limits ` +
+          `(max ${MAX_CHUNKS}). Try a smaller repo, or a repo with a more focused subset of source files.`,
+      });
+    }
+
     const embeddings = await embedTexts(chunks.map((chunk) => chunk.content));
 
     clearRepoChunks(repoId);
