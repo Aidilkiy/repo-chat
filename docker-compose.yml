@@ -1,0 +1,15 @@
+services:
+  repo-chat:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-gpt-4o-mini}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      DB_PATH: /data/repo-chat.sqlite
+    volumes:
+      - repo-chat-data:/data
+
+volumes:
+  repo-chat-data:
