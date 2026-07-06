@@ -2,7 +2,10 @@ import Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
 import type { RepoChunk } from "../types.js";
 
-const db = new Database(process.env.DB_PATH || "repo-chat.sqlite");
+// Shared with query-service via the same file path (set DB_PATH to a shared volume/location).
+// WAL mode lets one process write while another reads without locking the whole file.
+const db = new Database(process.env.DB_PATH || "../repo-chat.sqlite");
+db.pragma("journal_mode = WAL");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS chunks (
@@ -38,17 +41,4 @@ export function insertChunks(chunks: Omit<RepoChunk, "id">[]): void {
   });
 
   insertMany(chunks);
-}
-
-export function getChunksForRepo(repoId: string): RepoChunk[] {
-  const rows = db
-    .prepare("SELECT id, repoId, filePath, startLine, endLine, content, embedding FROM chunks WHERE repoId = ?")
-    .all(repoId) as Array<Omit<RepoChunk, "embedding"> & { embedding: string }>;
-
-  return rows.map((row) => ({ ...row, embedding: JSON.parse(row.embedding) }));
-}
-
-export function repoExists(repoId: string): boolean {
-  const row = db.prepare("SELECT 1 FROM chunks WHERE repoId = ? LIMIT 1").get(repoId);
-  return Boolean(row);
 }

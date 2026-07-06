@@ -1,5 +1,5 @@
 {
-  "name": "repo-chat-server",
+  "name": "query-service",
   "version": "0.1.0",
   "private": true,
   "type": "module",
