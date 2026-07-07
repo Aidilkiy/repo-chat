@@ -1,39 +1,17 @@
 services:
   - type: web
-    name: repo-chat-ingest-service
+    name: repo-chat
     runtime: docker
-    dockerfilePath: ./services/ingest-service/Dockerfile
-    dockerContext: ./services/ingest-service
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     plan: free
-    healthCheckPath: /health
+    healthCheckPath: /api/health
     envVars:
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_EMBEDDING_MODEL
         value: gemini-embedding-001
-      - key: GITHUB_TOKEN
-        sync: false
-      - key: DB_PATH
-        sync: false
-
-  - type: web
-    name: repo-chat-query-service
-    runtime: docker
-    dockerfilePath: ./services/query-service/Dockerfile
-    dockerContext: ./services/query-service
-    plan: free
-    healthCheckPath: /health
-    envVars:
-      - key: GEMINI_API_KEY
-        sync: false
       - key: GEMINI_CHAT_MODEL
         value: gemini-2.5-flash
-      - key: DB_PATH
+      - key: GITHUB_TOKEN
         sync: false
-
-  - type: web
-    name: repo-chat-web
-    runtime: docker
-    dockerfilePath: ./services/web/Dockerfile
-    dockerContext: ./services/web
-    plan: free

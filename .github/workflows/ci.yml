@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [ingest-service, query-service, web]
     steps:
       - uses: actions/checkout@v4
 
@@ -18,14 +15,26 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install deps
+      - name: Install server deps
         run: npm install
-        working-directory: services/${{ matrix.service }}
+        working-directory: server
 
-      - name: Typecheck
+      - name: Typecheck server
         run: npm run typecheck
-        working-directory: services/${{ matrix.service }}
+        working-directory: server
 
-      - name: Build
+      - name: Build server
         run: npm run build
-        working-directory: services/${{ matrix.service }}
+        working-directory: server
+
+      - name: Install web deps
+        run: npm install
+        working-directory: web
+
+      - name: Typecheck web
+        run: npm run typecheck
+        working-directory: web
+
+      - name: Build web
+        run: npm run build
+        working-directory: web

@@ -9,7 +9,7 @@ const SYSTEM_INSTRUCTION =
 export async function answerFromContext(question: string, sources: QuerySource[]): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set. Add it to query-service/.env");
+    throw new Error("GEMINI_API_KEY is not set. Add it to server/.env");
   }
 
   const context = sources

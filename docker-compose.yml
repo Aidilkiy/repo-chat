@@ -1,36 +1,16 @@
 services:
-  repo-chat-ingest-service:
-    build: ./services/ingest-service
+  repo-chat:
+    build: .
     ports:
-      - "8788:8788"
+      - "8787:8787"
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_EMBEDDING_MODEL: ${GEMINI_EMBEDDING_MODEL:-gemini-embedding-001}
+      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-2.5-flash}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       DB_PATH: /data/repo-chat.sqlite
     volumes:
       - repo-chat-data:/data
-
-  repo-chat-query-service:
-    build: ./services/query-service
-    ports:
-      - "8789:8789"
-    environment:
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      GEMINI_CHAT_MODEL: ${GEMINI_CHAT_MODEL:-gemini-2.5-flash}
-      DB_PATH: /data/repo-chat.sqlite
-    volumes:
-      - repo-chat-data:/data
-    depends_on:
-      - repo-chat-ingest-service
-
-  web:
-    build: ./services/web
-    ports:
-      - "8080:80"
-    depends_on:
-      - repo-chat-ingest-service
-      - repo-chat-query-service
 
 volumes:
   repo-chat-data:
