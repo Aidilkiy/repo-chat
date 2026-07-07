@@ -49,6 +49,7 @@ Serves the built frontend and API together on `http://localhost:8787`.
 
 ## Roadmap ideas
 
-- Swap SQLite for pgvector and deploy on AWS (RDS + ECS) as the "cloud" half of this project.
+- Previously split into independent ingest/query services as a first step toward a Kubernetes/microservices showcase, but reverted back to this single-service version — Render's private networking between the split services proved unreliable, and local Kubernetes setup hit an unresolved Docker image-pull issue in this environment. The split's code and the lessons from it are preserved in git history if revisited later.
+- Swap SQLite for pgvector for real multi-tenant scale.
 - AST-aware chunking (split by function/class instead of raw line counts).
 - Support private repos via GitHub OAuth.
