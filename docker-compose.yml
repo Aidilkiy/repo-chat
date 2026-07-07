@@ -1,5 +1,5 @@
 services:
-  ingest-service:
+  repo-chat-ingest-service:
     build: ./services/ingest-service
     ports:
       - "8788:8788"
@@ -11,7 +11,7 @@ services:
     volumes:
       - repo-chat-data:/data
 
-  query-service:
+  repo-chat-query-service:
     build: ./services/query-service
     ports:
       - "8789:8789"
@@ -22,15 +22,15 @@ services:
     volumes:
       - repo-chat-data:/data
     depends_on:
-      - ingest-service
+      - repo-chat-ingest-service
 
   web:
     build: ./services/web
     ports:
       - "8080:80"
     depends_on:
-      - ingest-service
-      - query-service
+      - repo-chat-ingest-service
+      - repo-chat-query-service
 
 volumes:
   repo-chat-data:
