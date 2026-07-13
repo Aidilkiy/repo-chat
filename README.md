@@ -2,6 +2,10 @@
 
 Ask natural-language questions about a public GitHub repo and get answers grounded in the actual source code, with file/line citations — not guesses.
 
+![RepoChat demo](./repochat-demo.gif)
+
+**Live:** [repo-chat-ydtv.onrender.com](https://repo-chat-ydtv.onrender.com)
+
 ## Why this exists
 
 Onboarding onto an unfamiliar codebase means grepping around for "where is X handled?" This is a small RAG (Retrieval-Augmented Generation) tool that indexes a repo's source files and answers questions using only the code it retrieved, citing exactly which file and lines it used.
